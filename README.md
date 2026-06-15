@@ -201,46 +201,93 @@ full model, the degrade ladder, and how to wire a tool into a flow step.
 
 ## Current State
 
-This repository is in Harness v0.
+This repository is in Harness v0, configured as an **agent-ready research harness**.
 
-There is no application implementation and no baked-in product specification
-yet. The current work is the reusable project harness: the file structure,
-agent operating model, feature intake process, story templates, and validation
-expectations that help humans and agents turn a future user-provided spec into
-implementation work.
+The harness supports:
+- Structured research workflows via dedicated Claude Code skills (`deep-research`,
+  `academic-paper`, `academic-paper-reviewer`, `academic-pipeline`).
+- Python code quality enforcement via automated hooks (ruff, pyright, pytest).
+- The standard harness discipline: feature intake, story packets, validation
+  expectations, and decision records.
+
+## Research Workflow
+
+Research tasks use dedicated skills instead of the generic implementation loop.
+See `docs/RESEARCH_WORKFLOW.md` for the full guide.
+
+| Task | Skill |
+| --- | --- |
+| Research question / literature review / fact-check | `/deep-research` |
+| Write or revise an academic paper | `/academic-paper` |
+| Peer-review a manuscript | `/academic-paper-reviewer` |
+| Full research-to-paper pipeline | `/academic-pipeline` |
+
+Research artifacts are stored under:
+
+- `docs/research/` — research briefs, fact-checks, literature notes
+- `docs/papers/` — paper drafts and final versions
+- `docs/reviews/` — standalone peer-review reports
+
+## Python Code Quality
+
+Every Python file written or edited by an agent is automatically checked by
+three tools configured as Claude Code `PostToolUse` hooks in `.claude/settings.json`:
+
+| Tool | Role | What it does |
+| --- | --- | --- |
+| `ruff format` | Formatter | Auto-formats the changed file |
+| `ruff check --fix` | Linter | Finds and auto-fixes lint issues |
+| `pyright` | Type checker | Static type analysis on the changed file |
+| `pytest` | Test runner | Runs the full test suite after any Python change |
+
+The hooks trigger automatically on `Write` and `Edit` tool use for `.py` files.
+No manual step is required. Install the tools in your project environment:
+
+```bash
+pip install ruff pyright pytest
+# or with uv:
+uv add --dev ruff pyright pytest
+```
 
 ## Product Sources
 
-No product contract is currently defined.
+The research product contract is at `docs/product/research.md`.
 
-When a user provides a project specification, add or reference it as the input
-spec for the first buildout, then derive smaller living artifacts from it:
+When a software project specification is added, derive living artifacts from it:
 
 - `docs/product/`: current product contract files, created from the spec.
 - `docs/stories/`: story packets and backlog created from selected work.
 - `docs/TEST_MATRIX.md`: behavior-to-proof control panel.
 - `docs/decisions/`: durable decisions and tradeoffs.
 
-Do not keep a project-specific spec or product breakdown in this harness until
-a real project supplies one.
-
 ## Repository Structure
 
 ```text
 project/
   AGENTS.md
+  CLAUDE.md
   README.md
+  .claude/
+    settings.json        # PostToolUse hooks: ruff, pyright, pytest
   docs/
     HARNESS.md
     FEATURE_INTAKE.md
+    RESEARCH_WORKFLOW.md # Research skill guide
     ARCHITECTURE.md
     TEST_MATRIX.md
     HARNESS_BACKLOG.md
     product/
+      research.md        # Research product contract
     stories/
+      epics/
+        E04-research/    # Research epic
     decisions/
+    research/            # Research output artifacts
+    papers/              # Paper drafts and finals
+    reviews/             # Peer-review reports
     demo/
     templates/
+      research-story.md  # Research story template (RS-XXX)
   scripts/
     README.md
 ```

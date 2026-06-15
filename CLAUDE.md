@@ -12,6 +12,8 @@ context-load time. Never wrap them in backticks; that disables the import.
 
 @docs/FEATURE_INTAKE.md
 
+@docs/RESEARCH_WORKFLOW.md
+
 Also run `scripts/bin/harness-cli query matrix` before starting work.
 
 Lane-dependent context (`README.md`, `docs/HARNESS.md`, `docs/ARCHITECTURE.md`,
